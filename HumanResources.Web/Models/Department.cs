@@ -11,7 +11,8 @@ namespace HumanResources.Web.Models
 
         public DateTime Established { get; set; }
 
+        public List<Employee>? Employees { get; set; }
 
-        
+
     }
 }

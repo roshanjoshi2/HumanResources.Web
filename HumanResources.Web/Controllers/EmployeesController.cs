@@ -48,8 +48,8 @@ namespace HumanResources.Web.Controllers
         public IActionResult Create()
         {
 
-          
-            var departmentlist = _context.Departments.Select(x=> new SelectListItem{ Text = x.Name, Value = x.Name}).ToList();
+
+            var departmentlist = _context.Departments.Select(department => new SelectListItem { Text = department.Name, Value = department.Id.ToString() }).ToList();
             ViewData["departments"] = departmentlist;
 
 
@@ -64,7 +64,7 @@ namespace HumanResources.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Email,Address,Gender,Dob,JoinDate,Department,Designation")] Employee employee)
+        public async Task<IActionResult> Create(/*[Bind("Id,Name,Email,Address,Gender,Dob,JoinDate,Department,Designation")] */Employee employee)
         {
             if (ModelState.IsValid)
             {
