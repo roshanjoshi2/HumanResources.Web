@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using HumanResources.Web.Models;
 using Microsoft.Extensions.Hosting;
+using HumanResources.Web.ViewModels;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using HumanResources.Web.Mapper;
 
 namespace HumanResources.Web.Controllers
 {
@@ -22,8 +25,13 @@ namespace HumanResources.Web.Controllers
         // GET: Employees
         public async Task<IActionResult> Index()
         {
-            var employees = _context.Employees.Include(e=>e.Department).ToList();
-            var employee= _context.Employees.Include(e => e.Designation).ToList();
+            var employees =await _context.Employees.Include(e=>e.Department).ToListAsync();
+            var employee= await _context.Employees.Include(e => e.Designation).ToListAsync();
+
+            
+
+            var employeeViewModels = employee.ToViewModel();
+
             return _context.Employees != null ? 
                           View(await _context.Employees.ToListAsync()) :
                           Problem("Entity set 'HRDbContext.Employees'  is null.");
@@ -69,17 +77,19 @@ namespace HumanResources.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(/*[Bind("Id,Name,Email,Address,Gender,Dob,JoinDate,Department,Designation")]*/ Employee employee)
+        public async Task<IActionResult> Create(/*[Bind("Id,Name,Email,Address,Gender,Dob,JoinDate,Department,Designation")]*/ EmployeeViewModel employeeViewModel)
         {
-            var relativePath = saveProfileImage(employee.ProfileImage);
+            var relativePath = saveProfileImage(employeeViewModel.ProfileImage);
+            //Map view model to model
+            var employee = employeeViewModel.ToModel();
             if (ModelState.IsValid)
             {
-                employee.ProfileImagePath = relativePath;
-                _context.Add(employee);
+                employeeViewModel.ProfileImagePath = relativePath;
+                _context.Add(employeeViewModel);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(employee);
+            return View(employeeViewModel);
         }
 
         // GET: Employees/Edit/5
@@ -103,10 +113,10 @@ namespace HumanResources.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,/* [Bind("Id,Name,Email,Address,Gender,Dob,JoinDate,Department,Designation")]*/Employee employee)
+        public async Task<IActionResult> Edit(int id,/* [Bind("Id,Name,Email,Address,Gender,Dob,JoinDate,Department,Designation")]*/EmployeeViewModel employeeViewModel)
         {
-            var relativePath = saveProfileImage(employee.ProfileImage);
-            if (id != employee.Id)
+            var relativePath = saveProfileImage(employeeViewModel.ProfileImage);
+            if (id != employeeViewModel.Id)
             {
                 return NotFound();
             }
@@ -115,13 +125,13 @@ namespace HumanResources.Web.Controllers
             {
                 try
                 {
-                    employee.ProfileImagePath = relativePath;
-                    _context.Update(employee);
+                    employeeViewModel.ProfileImagePath = relativePath;
+                    _context.Update(employeeViewModel);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EmployeeExists(employee.Id))
+                    if (!EmployeeExists(employeeViewModel.Id))
                     {
                         return NotFound();
                     }
@@ -132,7 +142,7 @@ namespace HumanResources.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(employee);
+            return View(employeeViewModel);
         }
 
         // GET: Employees/Delete/5

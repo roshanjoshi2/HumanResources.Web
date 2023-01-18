@@ -1,9 +1,10 @@
 ﻿using HumanResources.Web.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace HumanResources.Web.Models
+namespace HumanResources.Web.ViewModels
 {
-    public class Employee
+
+    public class EmployeeViewModel
     {
         public int Id { get; set; }
 
@@ -19,16 +20,16 @@ namespace HumanResources.Web.Models
 
         public DateTime JoinDate { get; set; }
 
-        public Designation? Designation { get; set; }
+        public string? Designation { get; set; }
         public int DesignationId { get; set; }
 
 
 
-        public Department? Department { get; set; }
+        public string? DepartmentName { get; set; }
         public int DepartmentId { get; set; }
 
-        //[NotMapped]
-        //public IFormFile ProfileImage { get; set; }
+
+        public IFormFile ProfileImage { get; set; }
         public string? ProfileImagePath { get; set; }
 
 
@@ -41,3 +42,4 @@ namespace HumanResources.Web.Models
 
     }
 }
+
