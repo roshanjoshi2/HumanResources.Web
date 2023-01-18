@@ -27,6 +27,10 @@ namespace HumanResources.Web.Models
         public Department? Department { get; set; }
         public int DepartmentId { get; set; }
 
+        [NotMapped]
+        public IFormFile ProfileImage { get; set; }
+        public string? ProfileImagePath { get; set; }
+
 
 
 

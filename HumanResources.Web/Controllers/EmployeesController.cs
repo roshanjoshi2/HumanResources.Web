@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using HumanResources.Web.Models;
+using Microsoft.Extensions.Hosting;
 
 namespace HumanResources.Web.Controllers
 {
@@ -58,6 +59,8 @@ namespace HumanResources.Web.Controllers
             var designationtlist = _context.Designations.Select(designation => new SelectListItem { Text = designation.Name, Value = designation.Id.ToString() }).ToList();
             ViewData["designations"] = designationtlist;
 
+            
+
             return View();
         }
 
@@ -68,8 +71,10 @@ namespace HumanResources.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(/*[Bind("Id,Name,Email,Address,Gender,Dob,JoinDate,Department,Designation")]*/ Employee employee)
         {
+            var relativePath = saveProfileImage(employee.ProfileImage);
             if (ModelState.IsValid)
             {
+                employee.ProfileImagePath = relativePath;
                 _context.Add(employee);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -98,8 +103,9 @@ namespace HumanResources.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Email,Address,Gender,Dob,JoinDate,Department,Designation")]Employee employee)
+        public async Task<IActionResult> Edit(int id,/* [Bind("Id,Name,Email,Address,Gender,Dob,JoinDate,Department,Designation")]*/Employee employee)
         {
+            var relativePath = saveProfileImage(employee.ProfileImage);
             if (id != employee.Id)
             {
                 return NotFound();
@@ -109,6 +115,7 @@ namespace HumanResources.Web.Controllers
             {
                 try
                 {
+                    employee.ProfileImagePath = relativePath;
                     _context.Update(employee);
                     await _context.SaveChangesAsync();
                 }
@@ -168,6 +175,21 @@ namespace HumanResources.Web.Controllers
         private bool EmployeeExists(int id)
         {
           return (_context.Employees?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        private string saveProfileImage(IFormFile profileImage)
+        {
+
+
+            var fileName = profileImage.FileName;
+            var uniqueFileName = $"{Guid.NewGuid()}_{fileName}";
+            var relativePath = $"/images/Profile/{uniqueFileName}";
+            var currentAppPath = Directory.GetCurrentDirectory();
+            var fullFilePath = Path.Combine(currentAppPath, $"wwwroot/{relativePath}");
+
+            var stream = System.IO.File.Create(fullFilePath);
+            profileImage.CopyTo(stream);
+            return relativePath;
         }
     }
 }
