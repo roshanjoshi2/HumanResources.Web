@@ -21,7 +21,9 @@ namespace HumanResources.Web.Controllers
         // GET: Employees
         public async Task<IActionResult> Index()
         {
-              return _context.Employees != null ? 
+            var employees = _context.Employees.Include(e=>e.Department).ToList();
+            var employee= _context.Employees.Include(e => e.Designation).ToList();
+            return _context.Employees != null ? 
                           View(await _context.Employees.ToListAsync()) :
                           Problem("Entity set 'HRDbContext.Employees'  is null.");
         }
@@ -53,7 +55,7 @@ namespace HumanResources.Web.Controllers
             ViewData["departments"] = departmentlist;
 
 
-            var designationtlist = _context.Designations.Select(x => new SelectListItem { Text = x.Name, Value = x.Name }).ToList();
+            var designationtlist = _context.Designations.Select(designation => new SelectListItem { Text = designation.Name, Value = designation.Id.ToString() }).ToList();
             ViewData["designations"] = designationtlist;
 
             return View();
@@ -64,7 +66,7 @@ namespace HumanResources.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(/*[Bind("Id,Name,Email,Address,Gender,Dob,JoinDate,Department,Designation")] */Employee employee)
+        public async Task<IActionResult> Create(/*[Bind("Id,Name,Email,Address,Gender,Dob,JoinDate,Department,Designation")]*/ Employee employee)
         {
             if (ModelState.IsValid)
             {
